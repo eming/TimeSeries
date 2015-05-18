@@ -1,0 +1,6 @@
+1.for param forecasting not enough data for learning and how to put weather info of whole week, because params belong to week
+2.my idea: 
+2.1 clustering all weeks of all devices ,100 centers
+2.2 ICA of 100 centers for 10 components
+2.3 reconstruct all weeks from 10 components
+2.4 but sure to get random params in this case also
