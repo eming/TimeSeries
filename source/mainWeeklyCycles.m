@@ -15,22 +15,40 @@ for i=1:centerCount
     plot(center(i,:));
 end;
     
-threshold=5;
+threshold=20;
 meanWeekError = sort(meanWeekError);
 figure;
-satisfying = find(meanWeekError < threshold);
+logicalIndex=meanWeekError < threshold;
+satisfying = find(logicalIndex);
 size(satisfying)
 plot(meanWeekError(satisfying));
 
-weekError = sort(weekError);
 figure;
-satisfying = find(weekError < threshold);
+logicalIndex=weekError < threshold;
+satisfying = find(logicalIndex);
 size(satisfying)
-plot(weekError(satisfying));
+plot(sort(weekError(satisfying)));
 
 figure;
-params=deviceParams{1,1};
+satisfying = find(~logicalIndex);
+i=ceil(satisfying(end)/13);
+devicesKeys = keys(devices);
+deviceData=devices(devicesKeys{i});
+j=mod(satisfying(end),13)+1;
+deviceParam=deviceParams{i};
+reconstructed=deviceParam(:,j)'*center;
+plot(1:672/stepForResolution,deviceData(:,j),'r',1:672/stepForResolution,reconstructed,'g');
+
+figure;
+testId=200;
+params=deviceParams{testId};
 for i=1:centerCount
     subplot(centerCount/2,2,i);
     plot(params(i,:));
+end;
+
+deviceData=devices(devicesKeys{testId});
+for i=1:13
+    figure;
+    plot(deviceData(:,i));
 end;

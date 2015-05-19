@@ -32,6 +32,10 @@ for i=1:m
     deviceError(i) = 100*mean(abs((coeff*center - serie(i,:))./serie(i,:)));
 end;
 
+threshold=20;
 deviceError = sort(deviceError);
 figure;
-plot(deviceError(1:900));
+logicalIndex=deviceError<threshold;
+satisfying=find(logicalIndex);
+size(satisfying)
+plot(deviceError(satisfying));
