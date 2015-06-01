@@ -3,7 +3,7 @@ function [devices]=weeklyMeanData(devices, stepForResolution)
     [~, m] = size(devicesKeys);
     for i=1:m
         deviceData = devices(devicesKeys{i});
-        sumData = nan*ones(672/stepForResolution, 14);
+        sumData = nan*ones(672/stepForResolution, 13);
         for j=1:(672/stepForResolution)
             sumData(j,:) = sum(deviceData((j-1)*stepForResolution+1:j*stepForResolution,:),1);
         end;

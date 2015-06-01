@@ -1,3 +1,5 @@
+% close all
+% clear all
 load('devices.mat');
 
 weekCount = 10;
@@ -10,13 +12,17 @@ for i=1:m
     for j=1:weekCount
         mergeData((j-1)*672 + 1:j*672) = deviceData(:,j)';
     end;
+%     mergeData = smooth(mergeData,11);
+    minValue=min(mergeData);
+    maxValue=max(mergeData);
+    mergeData = 100*(mergeData-minValue)/(maxValue-minValue);
     serie(i,:) = mergeData;
 end;
 
 centerCount = 10;
-iterationCount=100;
+iterationCount=50;
 exponent=2;
-[center,U,J]=fcm(serie,centerCount,[exponent; iterationCount; nan; nan]);
+% [center,U,J]=fcm(serie,centerCount,[exponent; iterationCount; nan; nan]);
 
 figure('units','normalized','outerposition',[0 0 1 1]);
 for i=1:centerCount
@@ -29,10 +35,10 @@ deviceError = nan*ones(1,m);
 for i=1:m
     coeff = (center'\serie(i,:)')';
     deviceParam(i,:) = coeff;
-    deviceError(i) = 100*mean(abs((coeff*center - serie(i,:))./serie(i,:)));
+    deviceError(1,i) = 100*mean(abs((coeff*center - serie(i,:))))/(max(serie(i,:))-min(serie(i,:)));
 end;
 
-threshold=20;
+threshold=10;
 deviceError = sort(deviceError);
 figure;
 logicalIndex=deviceError<threshold;

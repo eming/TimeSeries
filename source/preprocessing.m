@@ -1,5 +1,5 @@
 %# read and parse data file
-fid = fopen('Circuit_Data_Summer_2011_prepared.txt','rt');
+fid = fopen('../docs/Circuit_Data_Summer_2011_prepared.txt','rt');
 count = 1000;
 devices = containers.Map('KeyType','int32','ValueType','any');
 
