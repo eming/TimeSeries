@@ -7,8 +7,8 @@ function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(dev
         Y(i,:) = deviceData(:,14);
     end;
 
-    %[center,U,~]=fcm(Y,centerCount,[exponent; iterationCount; nan; nan]);
-    [U,center,~]=myFcm(Y,iterationCount,centerCount,exponent);
+    [center,U,~]=fcm(Y,centerCount,[exponent; iterationCount; nan; nan]);
+    %[U,center,~]=myFcm(Y,iterationCount,centerCount,exponent);
     
     if isLeastSquareSolution
         coeff=NaN*ones(m,centerCount);
@@ -21,7 +21,7 @@ function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(dev
     
     meanWeekError=nan*ones(1,m);
     for i=1:m
-        meanWeekError(i) = 100*mean(abs((coeff(i,:)*center - Y(i,:))))/(max(Y(i,:))-min(Y(i,:)));
+        meanWeekError(i) = 100*mean(abs(coeff(i,:)*center - Y(i,:)))/(max(Y(i,:))-min(Y(i,:)));
     end;
     
     weekError=nan*ones(1,m*13);
@@ -32,7 +32,7 @@ function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(dev
         for j=1:13
             weekCoeff = (center'\deviceData(:,j))';
             deviceParam(:,j) = weekCoeff';
-            weekError((i-1)*13 + j) = 100*mean(abs((weekCoeff*center - deviceData(:,j)')))/(max(deviceData(:,j))-min(deviceData(:,j)));
+            weekError((i-1)*13 + j) = 100*mean(abs(weekCoeff*center - deviceData(:,j)'))/(max(deviceData(:,j))-min(deviceData(:,j)));
         end;
         deviceParams{i}=deviceParam;
     end;

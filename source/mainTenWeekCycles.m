@@ -1,5 +1,5 @@
-% close all
-% clear all
+close all
+clear all
 load('devices.mat');
 
 weekCount = 10;
