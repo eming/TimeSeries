@@ -1,10 +1,10 @@
-function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(devices, centerCount,exponent,iterationCount, isLeastSquareSolution)
+function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(devices, centerCount,exponent,iterationCount, isLeastSquareSolution, cycleCount)
     Y = [];
     devicesKeys = keys(devices);
     [~, m] = size(devicesKeys);
     for i=1:m
         deviceData = devices(devicesKeys{i});
-        Y(i,:) = deviceData(:,14);
+        Y(i,:) = deviceData(:,cycleCount+1);
     end;
 
     [center,U,~]=fcm(Y,centerCount,[exponent; iterationCount; nan; nan]);
@@ -24,15 +24,15 @@ function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(dev
         meanWeekError(i) = 100*mean(abs(coeff(i,:)*center - Y(i,:)))/(max(Y(i,:))-min(Y(i,:)));
     end;
     
-    weekError=nan*ones(1,m*13);
+    weekError=nan*ones(1,m*cycleCount);
     deviceParams=cell(1,m);
     for i=1:m
-        deviceParam=nan*ones(centerCount,13);
+        deviceParam=nan*ones(centerCount,cycleCount);
         deviceData = devices(devicesKeys{i});
-        for j=1:13
+        for j=1:cycleCount
             weekCoeff = (center'\deviceData(:,j))';
             deviceParam(:,j) = weekCoeff';
-            weekError((i-1)*13 + j) = 100*mean(abs(weekCoeff*center - deviceData(:,j)'))/(max(deviceData(:,j))-min(deviceData(:,j)));
+            weekError((i-1)*cycleCount + j) = 100*mean(abs(weekCoeff*center - deviceData(:,j)'))/(max(deviceData(:,j))-min(deviceData(:,j)));
         end;
         deviceParams{i}=deviceParam;
     end;
