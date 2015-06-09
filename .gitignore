@@ -5,3 +5,7 @@ docs/Header Information Summer 2011.txt
 docs/SystemLevelSummer.csv
 docs/WeatherLocalSummer.csv
 source/devices.mat
+source/dbScanCenters.mat
+source/dbScanCentersDayCycle.mat
+source/devicesRowData.mat
+source/outliers.mat
