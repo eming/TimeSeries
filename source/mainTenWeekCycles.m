@@ -22,7 +22,7 @@ end;
 centerCount = 10;
 iterationCount=50;
 exponent=2;
-% [center,U,J]=fcm(serie,centerCount,[exponent; iterationCount; nan; nan]);
+[center,U,J]=fcm(serie,centerCount,[exponent; iterationCount; nan; nan]);
 
 figure('units','normalized','outerposition',[0 0 1 1]);
 for i=1:centerCount

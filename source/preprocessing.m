@@ -1,4 +1,7 @@
-%# read and parse data file
+fid = fopen('../docs/WeatherLocalSummer.csv','rt');
+C = textscan(fid, '%s%f%f%f%f%f', 'delimiter',{','},'MultipleDelimsAsOne', true);
+externalData = [C{2} C{3} C{4} C{5} C{6}];
+% read and parse data file
 fid = fopen('../docs/Circuit_Data_Summer_2011_prepared.txt','rt');
 count = 1000;
 devices = containers.Map('KeyType','int32','ValueType','any');
@@ -37,6 +40,7 @@ while ~feof(fid)
         condition = ids(end) < n;
     end;
 end;
+fclose(fid);
 %remove incomplete week(14th)
 devicesKeys = keys(devices);
 [n, m] = size(devicesKeys);
