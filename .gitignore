@@ -9,3 +9,5 @@ source/dbScanCenters.mat
 source/dbScanCentersDayCycle.mat
 source/devicesRowData.mat
 source/outliers.mat
+source/dbScanCentersDaylyCycle.mat
+source/devicesRowDataAndExternalRowData.mat

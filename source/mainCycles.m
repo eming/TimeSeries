@@ -1,12 +1,12 @@
 close all
 clear all
 load('devicesRowDataAndExternalRowData.mat');
-% load('dbScanCenters.mat');
+load('dbScanCentersDaylyCycle.mat');
 deviceKeys = keys(devices);
 [~,m]=size(deviceKeys);
 rowDataLength=8736;
-cycleLength = 24*4*7*13;
-stepForResolution = 1;
+cycleLength = 24*4;
+stepForResolution = 4;
 cycleCount=rowDataLength/cycleLength;
 %normalization
 for i=1:m
@@ -26,7 +26,8 @@ for i=1:m
     end;
     devices(deviceKeys{i}) = deviceData;
 end;
-%make resolution, last column for each device is mean cycle
+%make resolution&split row data to cycles
+%last column for each device is mean cycle
 devices = cycleMeanData(devices,stepForResolution,cycleLength);
 % removing  outliers
 P=NaN*ones(cycleLength/stepForResolution,m*cycleCount);
@@ -35,9 +36,9 @@ for i=1:m
     P(:,((i-1)*cycleCount+1):i*cycleCount)=deviceData(:,1:cycleCount);
 end;
 %*1 for weeks and 10 weeks, *2 for days
-E=norm(P(:,1)-P(:,2));
-minPts=30;
-[C, ptsC, centres] = dbscan(P, E, minPts);
+% E=norm(P(:,1)-P(:,2));
+% minPts=30;
+% [C, ptsC, centres] = dbscan(P, E, minPts);
 satisfying = find(~ptsC);
 [l,~]=size(satisfying);
 outliers=[];
@@ -49,9 +50,10 @@ for k=1:l
     end;
 end;
 deviceKeys = keys(devices);
+[~,m]=size(deviceKeys);
 %clustering and reconstruction
-centerCount=20;
-iterationCount=50;
+centerCount=10;
+iterationCount=100;
 exponent=2;
 isLeastSquareSolution = true;
 [center,coeff,meanCycleError,cycleError,deviceParams] = fuzzyClustering(devices, centerCount,exponent,iterationCount,isLeastSquareSolution,cycleCount);
@@ -74,29 +76,33 @@ figure('name','cycle error','NumberTitle','off');
 logicalIndex=cycleError < threshold;
 satisfying = find(logicalIndex);
 size(satisfying)/size(cycleError)
+mean(cycleError)
 plot(sort(cycleError(satisfying)));
 %graphs of cycles with big error  
 satisfying = find(~logicalIndex);
-size(satisfying)
 [~,l]=size(satisfying);
 badDevices=[];
-for k=1:min(10,l)
+badExamplesToPlotCount=10;
+for k=1:l
     i=ceil(satisfying(k)/cycleCount);
     if ~ismember(i,badDevices)
         badDevices=[badDevices i];
     end;
-%     key=deviceKeys{i};
-%     deviceData=devices(key);
-%     j=mod(satisfying(k),cycleCount);
-%     if j==0
-%         j=cycleCount;
-%     end;
-%     deviceParam=deviceParams{i};
-%     reconstructed=deviceParam(:,j)'*center;
-%     figure(('name',strcat('key = ',num2str(key)),'NumberTitle','off');
-%     plot(1:cycleLength/stepForResolution,deviceData(:,j),'r',1:cycleLength/stepForResolution,reconstructed,'g');
-%     errorTitle = 100*mean(abs(reconstructed - deviceData(:,j)'))/(max(deviceData(:,j))-min(deviceData(:,j)));
-%     title(num2str(errorTitle));
+    if badExamplesToPlotCount>0
+        badExamplesToPlotCount=badExamplesToPlotCount-1;
+        key=deviceKeys{i};
+        deviceData=devices(key);
+        j=mod(satisfying(k),cycleCount);
+        if j==0
+            j=cycleCount;
+        end;
+        deviceParam=deviceParams{i};
+        reconstructed=deviceParam(:,j)'*center;
+        figure('name',strcat('key = ',num2str(key)),'NumberTitle','off');
+        plot(1:cycleLength/stepForResolution,deviceData(:,j),'r',1:cycleLength/stepForResolution,reconstructed,'g');
+        errorTitle = 100*mean(abs(reconstructed - deviceData(:,j)'))/(max(deviceData(:,j))-min(deviceData(:,j)));
+        title(num2str(errorTitle));
+    end;
 end;
 %make same resolution for externalData
 [l,~]=size(externalData);
@@ -110,43 +116,45 @@ end;
 externalData=data;
 %3 cycles(one per device) with small errors
 k=1;
-goodDeviceCount=0;
-while goodDeviceCount<3
-    if ismember(k,badDevices)
-        k=k+1;
-        continue;
-    end;
-    goodDeviceCount=goodDeviceCount+1;
-    if cycleCount==13 || cycleCount==1
-        step=1;
-    else
-        step=7;
-    end;
-    %if daylyCycle then show each day of week in seperate figure
-    for t=1:step
-        periodic=t:step:cycleCount;
-        figure('name',num2str(t),'NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
-        params=deviceParams{k};
-        for i=1:centerCount
-           subplot((centerCount/2)+3,2,i);
-           plot(params(i,periodic));
-           title(strcat(num2str(i),'-th center'));
+goodDevicesToPlotCount=0;
+if cycleCount~=1
+    while goodDevicesToPlotCount>0 && k<=m
+        if ismember(k,badDevices)
+            k=k+1;
+            continue;
         end;
-        subplot((centerCount/2)+3,2,centerCount+1);
-        plot(externalData(periodic,1));
-        title('TEMP');
-        subplot((centerCount/2)+3,2,centerCount+2);
-        plot(externalData(periodic,2));
-        title('HUMIDITY');
-        subplot((centerCount/2)+3,2,centerCount+3);
-        plot(externalData(periodic,3));
-        title('PRESSURE');
-        subplot((centerCount/2)+3,2,centerCount+4);
-        plot(externalData(periodic,4));
-        title('WIND SPEED');
-        subplot((centerCount/2)+3,2,centerCount+5);
-        plot(externalData(periodic,5));
-        title('RAINFALL');
+        goodDevicesToPlotCount=goodDevicesToPlotCount-1;
+        if cycleCount==13 || cycleCount==1
+            step=1;
+        else
+            step=7;
+        end;
+        %if daylyCycle then show each day of week in seperate figure
+        for t=1:step
+            periodic=t:step:cycleCount;
+            figure('name',num2str(t),'NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
+            params=deviceParams{k};
+            for i=1:centerCount
+               subplot((centerCount/2)+3,2,i);
+               plot(params(i,periodic));
+               title(strcat(num2str(i),'-th center'));
+            end;
+            subplot((centerCount/2)+3,2,centerCount+1);
+            plot(externalData(periodic,1));
+            title('TEMP');
+            subplot((centerCount/2)+3,2,centerCount+2);
+            plot(externalData(periodic,2));
+            title('HUMIDITY');
+            subplot((centerCount/2)+3,2,centerCount+3);
+            plot(externalData(periodic,3));
+            title('PRESSURE');
+            subplot((centerCount/2)+3,2,centerCount+4);
+            plot(externalData(periodic,4));
+            title('WIND SPEED');
+            subplot((centerCount/2)+3,2,centerCount+5);
+            plot(externalData(periodic,5));
+            title('RAINFALL');
+        end;
+        k=k+1;
     end;
-    k=k+1;
 end;
