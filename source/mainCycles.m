@@ -1,29 +1,34 @@
 close all
 clear all
 load('devicesRowDataAndExternalRowData.mat');
-load('dbScanCentersDaylyCycle.mat');
+load('dbScanCenters.mat');
 deviceKeys = keys(devices);
 [~,m]=size(deviceKeys);
-rowDataLength=8736;
-cycleLength = 24*4;
-stepForResolution = 4;
+cycleLength = 4*24*7;
+%length of the data will be used(maybe some of them will be skiped for testing phase)
+rowDataLength=4*24*7*13;
+%all data length
+allDataLength=4*24*7*13;
+stepForResolution = 1;
 cycleCount=rowDataLength/cycleLength;
 %normalization
+if cycleCount==1
+    % if all weeks cycle normalizing globally
+    diapason=allDataLength;
+else           
+    % else normalizing per week
+    diapason=4*24*7;
+end;
+data=NaN*ones(m,allDataLength);
 for i=1:m
-    deviceData = devices(deviceKeys{i}); 
-    if cycleCount==1
-        % if ten week cycle normalizing globally
-        minValue=min(deviceData);
-        maxValue=max(deviceData);
-        deviceData = 100*(deviceData-minValue)/(maxValue-minValue);
-    else           
-        % else normalizing per week
-        for j=1:rowDataLength/672
-           minValue=min(deviceData((j-1)*672+1:j*672));
-           maxValue=max(deviceData((j-1)*672+1:j*672));
-           deviceData((j-1)*672+1:j*672) = 100*(deviceData((j-1)*672+1:j*672)-minValue)/(maxValue-minValue);
-        end;
-    end;
+    deviceData = devices(deviceKeys{i});
+    for j=1:allDataLength/diapason       
+        minValue=min(deviceData((j-1)*diapason+1:j*diapason));
+        maxValue=max(deviceData((j-1)*diapason+1:j*diapason));
+        deviceData((j-1)*diapason+1:j*diapason) = 100*(deviceData((j-1)*diapason+1:j*diapason)-minValue)/(maxValue-minValue);
+    end;    
+    data(i,:)=deviceData;
+    deviceData=deviceData(1:rowDataLength);
     devices(deviceKeys{i}) = deviceData;
 end;
 %make resolution&split row data to cycles
@@ -35,10 +40,10 @@ for i=1:m
     deviceData = devices(deviceKeys{i});
     P(:,((i-1)*cycleCount+1):i*cycleCount)=deviceData(:,1:cycleCount);
 end;
-%*1 for weeks and 10 weeks, *2 for days
-% E=norm(P(:,1)-P(:,2));
+%*1 for week , *0.5 for all weeks, *2 for day
+% E=norm(P(:,1)-P(:,2))*0.5;
 % minPts=30;
-% [C, ptsC, centres] = dbscan(P, E, minPts);
+% [C, ptsC, dbscanCenter] = dbscan(P, E, minPts);
 satisfying = find(~ptsC);
 [l,~]=size(satisfying);
 outliers=[];
@@ -52,11 +57,14 @@ end;
 deviceKeys = keys(devices);
 [~,m]=size(deviceKeys);
 %clustering and reconstruction
-centerCount=10;
-iterationCount=100;
+centerCount=7;
+iterationCount=50;
 exponent=2;
 isLeastSquareSolution = true;
-[center,coeff,meanCycleError,cycleError,deviceParams] = fuzzyClustering(devices, centerCount,exponent,iterationCount,isLeastSquareSolution,cycleCount);
+isOriginalsClustering = true;
+[center,coeff,meanCycleError,cycleError,deviceParams] = fuzzyClustering(devices, centerCount,exponent,iterationCount,isLeastSquareSolution,cycleCount,cycleLength/stepForResolution, isOriginalsClustering);
+figure('name','centers','NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
+corrplot(center');
 %plot centers
 figure('name','centers','NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
 for i=1:centerCount
@@ -82,7 +90,7 @@ plot(sort(cycleError(satisfying)));
 satisfying = find(~logicalIndex);
 [~,l]=size(satisfying);
 badDevices=[];
-badExamplesToPlotCount=10;
+badExamplesToPlotCount=0;
 for k=1:l
     i=ceil(satisfying(k)/cycleCount);
     if ~ismember(i,badDevices)
@@ -105,16 +113,17 @@ for k=1:l
     end;
 end;
 %make same resolution for externalData
-[l,~]=size(externalData);
 %row external data resolution is hourly not 15 min
+externalDataLength=rowDataLength/4;
+return;
 externalDataStepForResolution=(cycleLength/4);
-newLength=l/externalDataStepForResolution;
+newLength=externalDataLength/externalDataStepForResolution;
 data=NaN*ones(newLength,5);
 for j=1:newLength
    data(j,:)=mean(externalData((j-1)*externalDataStepForResolution+1:j*externalDataStepForResolution,:),1);
 end;
 externalData=data;
-%3 cycles(one per device) with small errors
+%some cycles(one per device) with small errors
 k=1;
 goodDevicesToPlotCount=0;
 if cycleCount~=1

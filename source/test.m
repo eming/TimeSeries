@@ -1,3 +1,20 @@
+j=1;
+data1=[];
+for i=1:1003
+    if ~ismember(i,outliers)
+        data1(j,:)=data(i,:);
+        j=j+1;
+    end;
+end;
+
+return;
+
+data1=[];
+for i=1:2184
+    data1(:,i)=sum(data(:,((i-1)*4+1):i*4),2);
+end;
+return;
+
 plot(deviceError(1:900));
 return;
 

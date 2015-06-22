@@ -1,14 +1,24 @@
-function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(devices, centerCount,exponent,iterationCount, isLeastSquareSolution, cycleCount)
-    Y = [];
+function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(devices, centerCount,exponent,iterationCount, isLeastSquareSolution, cycleCount, dataLength, isOriginalsClustering)
     devicesKeys = keys(devices);
     [~, m] = size(devicesKeys);
+    if isOriginalsClustering
+        Y=NaN*ones(m*cycleCount,dataLength);
+    else
+        Y=NaN*ones(m,dataLength);
+    end;
     for i=1:m
         deviceData = devices(devicesKeys{i});
-        Y(i,:) = deviceData(:,cycleCount+1);
+        if isOriginalsClustering
+            Y((i-1)*cycleCount+1:i*cycleCount,:) = deviceData(:,1:cycleCount)';
+        else
+            Y(i,:) = deviceData(:,cycleCount+1);
+        end;
     end;
 
-    [center,U,~]=fcm(Y,centerCount,[exponent; iterationCount; nan; nan]);
-    %[U,center,~]=myFcm(Y,iterationCount,centerCount,exponent);
+    [center,U,objFunction]=fcm(Y,centerCount,[exponent; iterationCount; nan; nan]);
+%     [U,center,~]=myFcm(Y,iterationCount,centerCount,exponent);   
+     figure;
+     plot(objFunction);
     
     if isLeastSquareSolution
         coeff=NaN*ones(m,centerCount);
