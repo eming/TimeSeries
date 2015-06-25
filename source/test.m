@@ -1,3 +1,11 @@
+
+figure;
+hold on;
+for i=1:centerCount
+    plot(center(i,:));
+end;
+hold off;
+return;
 j=1;
 data1=[];
 for i=1:1003
@@ -6,8 +14,9 @@ for i=1:1003
         j=j+1;
     end;
 end;
-
 return;
+csvread
+
 
 data1=[];
 for i=1:2184

@@ -1,15 +1,16 @@
-close all
-clear all
+close all;
+clear all;
+warning('off','MATLAB:rankDeficientMatrix');
 load('devicesRowDataAndExternalRowData.mat');
-load('dbScanCenters.mat');
+load('dbScanCentersDaylyCycle.mat');
 deviceKeys = keys(devices);
 [~,m]=size(deviceKeys);
-cycleLength = 4*24*7;
+cycleLength = 4*24;
 %length of the data will be used(maybe some of them will be skiped for testing phase)
 rowDataLength=4*24*7*13;
 %all data length
 allDataLength=4*24*7*13;
-stepForResolution = 1;
+stepForResolution = 4;
 cycleCount=rowDataLength/cycleLength;
 %normalization
 if cycleCount==1
@@ -57,14 +58,13 @@ end;
 deviceKeys = keys(devices);
 [~,m]=size(deviceKeys);
 %clustering and reconstruction
-centerCount=7;
+centerCount=10;
 iterationCount=50;
 exponent=2;
-isLeastSquareSolution = true;
 isOriginalsClustering = true;
-[center,coeff,meanCycleError,cycleError,deviceParams] = fuzzyClustering(devices, centerCount,exponent,iterationCount,isLeastSquareSolution,cycleCount,cycleLength/stepForResolution, isOriginalsClustering);
-figure('name','centers','NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
-corrplot(center');
+isLinearDependencesSkiped=false;
+[center,coeff,meanCycleError,cycleError,deviceParams] = fuzzyClustering(devices, centerCount,exponent,iterationCount,cycleCount,cycleLength/stepForResolution, isOriginalsClustering, isLinearDependencesSkiped);
+[centerCount,~]=size(center);
 %plot centers
 figure('name','centers','NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
 for i=1:centerCount
@@ -115,14 +115,13 @@ end;
 %make same resolution for externalData
 %row external data resolution is hourly not 15 min
 externalDataLength=rowDataLength/4;
-return;
 externalDataStepForResolution=(cycleLength/4);
 newLength=externalDataLength/externalDataStepForResolution;
-data=NaN*ones(newLength,5);
+externalDataNew=NaN*ones(newLength,5);
 for j=1:newLength
-   data(j,:)=mean(externalData((j-1)*externalDataStepForResolution+1:j*externalDataStepForResolution,:),1);
+   externalDataNew(j,:)=mean(externalData((j-1)*externalDataStepForResolution+1:j*externalDataStepForResolution,:),1);
 end;
-externalData=data;
+externalData=externalDataNew;
 %some cycles(one per device) with small errors
 k=1;
 goodDevicesToPlotCount=0;
@@ -141,28 +140,32 @@ if cycleCount~=1
         %if daylyCycle then show each day of week in seperate figure
         for t=1:step
             periodic=t:step:cycleCount;
-            figure('name',num2str(t),'NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
             params=deviceParams{k};
-            for i=1:centerCount
-               subplot((centerCount/2)+3,2,i);
-               plot(params(i,periodic));
-               title(strcat(num2str(i),'-th center'));
-            end;
-            subplot((centerCount/2)+3,2,centerCount+1);
-            plot(externalData(periodic,1));
-            title('TEMP');
-            subplot((centerCount/2)+3,2,centerCount+2);
-            plot(externalData(periodic,2));
-            title('HUMIDITY');
-            subplot((centerCount/2)+3,2,centerCount+3);
-            plot(externalData(periodic,3));
-            title('PRESSURE');
-            subplot((centerCount/2)+3,2,centerCount+4);
-            plot(externalData(periodic,4));
-            title('WIND SPEED');
-            subplot((centerCount/2)+3,2,centerCount+5);
-            plot(externalData(periodic,5));
-            title('RAINFALL');
+            corrWeightVector=params(:,periodic)';
+            correxternalData=externalData(periodic,:);
+            corrData=[corrWeightVector correxternalData];
+%             corrplot(corrData);
+%             figure('name',num2str(t),'NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
+%             for i=1:centerCount
+%                subplot((centerCount/2)+3,2,i);
+%                plot(params(i,periodic));
+%                title(strcat(num2str(i),'-th center'));
+%             end;
+%             subplot((centerCount/2)+3,2,centerCount+1);
+%             plot(externalData(periodic,1));
+%             title('TEMP');
+%             subplot((centerCount/2)+3,2,centerCount+2);
+%             plot(externalData(periodic,2));
+%             title('HUMIDITY');
+%             subplot((centerCount/2)+3,2,centerCount+3);
+%             plot(externalData(periodic,3));
+%             title('PRESSURE');
+%             subplot((centerCount/2)+3,2,centerCount+4);
+%             plot(externalData(periodic,4));
+%             title('WIND SPEED');
+%             subplot((centerCount/2)+3,2,centerCount+5);
+%             plot(externalData(periodic,5));
+%             title('RAINFALL');
         end;
         k=k+1;
     end;

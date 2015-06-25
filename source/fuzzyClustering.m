@@ -1,4 +1,4 @@
-function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(devices, centerCount,exponent,iterationCount, isLeastSquareSolution, cycleCount, dataLength, isOriginalsClustering)
+function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(devices, centerCount,exponent,iterationCount, cycleCount, dataLength, isOriginalsClustering, isLinearDependencesSkiped)
     devicesKeys = keys(devices);
     [~, m] = size(devicesKeys);
     if isOriginalsClustering
@@ -16,19 +16,37 @@ function [center,coeff,meanWeekError,weekError,deviceParams]=fuzzyClustering(dev
     end;
 
     [center,U,objFunction]=fcm(Y,centerCount,[exponent; iterationCount; nan; nan]);
-%     [U,center,~]=myFcm(Y,iterationCount,centerCount,exponent);   
-     figure;
-     plot(objFunction);
-    
-    if isLeastSquareSolution
-        coeff=NaN*ones(m,centerCount);
-        for i=1:m
-            coeff(i,:)=(center'\Y(i,:)')';
+%     [U,center,~]=myFcm(Y,iterationCount,centerCount,exponent); 
+%      figure;
+%      plot(objFunction);
+    if isLinearDependencesSkiped
+        i=1;
+        if cycleCount==13 && cycleCount==1
+            eps2=20;
+        else
+            eps2=10000;
         end;
-    else
-        coeff=U';
+        while i<centerCount
+            deletingRows=[];
+            for j=(i+1):centerCount
+                diff=center(i,:)-center(j,:);
+                dist2=diff*diff';
+                dist2
+                if dist2<eps2
+                    deletingRows=[deletingRows j];
+                end;
+            end;
+            center(deletingRows,:)=[];
+            [centerCount,~]=size(center);
+            i=i+1;
+        end;
     end;
     
+    coeff=NaN*ones(m,centerCount);
+    for i=1:m
+        coeff(i,:)=(center'\Y(i,:)')';
+    end;
+
     meanWeekError=nan*ones(1,m);
     for i=1:m
         meanWeekError(i) = 100*mean(abs(coeff(i,:)*center - Y(i,:)))/(max(Y(i,:))-min(Y(i,:)));
