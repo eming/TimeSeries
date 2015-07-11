@@ -1,11 +1,22 @@
 
-figure;
-hold on;
-for i=1:centerCount
-    plot(center(i,:));
+
+m=884;
+threshold=10;
+forecastingError=nan*ones(1,m);
+for i=1:m
+    forecastingError(i) = 100*mean(abs(coeff(i,:)*forecastedCenters - data(i,8065:8736)))/(max(data(i,:))-min(data(i,:)));
 end;
+figure('name','forecasting error','NumberTitle','off');
+mean(forecastingError)
+hold on;
+plot(sort(forecastingError));
+plot(1:m,ones(1,m)*5);
+plot(1:m,ones(1,m)*10);
+plot(1:m,ones(1,m)*15);
+plot(1:m,ones(1,m)*20);
 hold off;
 return;
+
 j=1;
 data1=[];
 for i=1:1003
@@ -14,7 +25,17 @@ for i=1:1003
         j=j+1;
     end;
 end;
+data=data1;
 return;
+
+figure;
+hold on;
+for i=1:centerCount
+    plot(center(i,:));
+end;
+hold off;
+return;
+
 csvread
 
 

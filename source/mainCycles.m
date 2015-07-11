@@ -2,15 +2,15 @@ close all;
 clear all;
 warning('off','MATLAB:rankDeficientMatrix');
 load('devicesRowDataAndExternalRowData.mat');
-load('dbScanCentersDaylyCycle.mat');
+%load('dbScanCentersDaylyCycle.mat');
 deviceKeys = keys(devices);
 [~,m]=size(deviceKeys);
-cycleLength = 4*24;
+cycleLength = 4*24*7*12;
 %length of the data will be used(maybe some of them will be skiped for testing phase)
-rowDataLength=4*24*7*13;
+rowDataLength=4*24*7*12;
 %all data length
 allDataLength=4*24*7*13;
-stepForResolution = 4;
+stepForResolution = 1;
 cycleCount=rowDataLength/cycleLength;
 %normalization
 if cycleCount==1
@@ -42,9 +42,9 @@ for i=1:m
     P(:,((i-1)*cycleCount+1):i*cycleCount)=deviceData(:,1:cycleCount);
 end;
 %*1 for week , *0.5 for all weeks, *2 for day
-% E=norm(P(:,1)-P(:,2))*0.5;
-% minPts=30;
-% [C, ptsC, dbscanCenter] = dbscan(P, E, minPts);
+E=norm(P(:,1)-P(:,2))*0.5;
+minPts=30;
+[C, ptsC, dbscanCenter] = dbscan(P, E, minPts);
 satisfying = find(~ptsC);
 [l,~]=size(satisfying);
 outliers=[];
@@ -58,7 +58,7 @@ end;
 deviceKeys = keys(devices);
 [~,m]=size(deviceKeys);
 %clustering and reconstruction
-centerCount=10;
+centerCount=3;
 iterationCount=50;
 exponent=2;
 isOriginalsClustering = true;
