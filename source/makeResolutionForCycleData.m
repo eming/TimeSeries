@@ -1,4 +1,6 @@
-% make resolution
+% make resolution: summarise point values with stepForResolution length
+% junks, so resulted resolutioned data is stepForResolution times shorter
+% of original row data
 function [devices]=makeResolutionForCycleData(devices, stepForResolution)
     devicesKeys = keys(devices);
     [~, m] = size(devicesKeys);
