@@ -39,10 +39,10 @@ function [center,coeff,cycleError]=fuzzyClustering21Centers(devices, centerCount
         end;
         badExamplesToPlotCountForEachWeekDay=1;
         for i=1:m
-            %if rowData is item for a spesific week day and device reconstruction error for one data point in rowData is 
-            %(reconstructedRowData[i]-realRowData[i])/(maxRowData-minRowData)
-            %overall rowData reconstruction error is mean value of 
-            %absolut values of all points multiplied by 100(interpretation of percentage)
+%           If “RowData” is data serie for a spesific week day 
+%           then device reconstruction error for one data point in rowData is 
+%           (reconstructedRowData[i]-realRowData[i])/(maxRowData-minRowData) .Max and Min taken from RowData. 
+%           Overall rowData reconstruction error is mean value of absolut values of all point errors multiplied by 100(interpretation of percentage)
             cycleError(i,weekDay) = 100*mean(abs(coeff(i,:,weekDay)*c - Y(i,:)))/(max(Y(i,:))-min(Y(i,:)));
             %just plot badExamplesToPlotCountForEachWeekDay number bad
             %reconstruction data for each week day clustering process
