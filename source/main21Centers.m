@@ -7,7 +7,7 @@ load('devicesRowDataAndExternalRowData.mat');
 deviceKeys = keys(devices);
 [~,m]=size(deviceKeys);
 %length of the data will be used(maybe some of them will be skiped for testing phase)
-rowDataLength=4*24*7*12;
+rowDataLength=4*24*7*13;
 %all data length
 allDataLength=4*24*7*13;
 stepForResolution = 1;

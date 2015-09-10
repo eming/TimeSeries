@@ -5,7 +5,7 @@ load('devicesRowDataAndExternalRowData.mat');
 %load('dbScanCentersDaylyCycle.mat');
 deviceKeys = keys(devices);
 [~,m]=size(deviceKeys);
-cycleLength = 4*24*7*12;
+cycleLength = 4*24;
 %length of the data will be used(maybe some of them will be skiped for testing phase)
 rowDataLength=4*24*7*12;
 %all data length
@@ -42,7 +42,7 @@ for i=1:m
     P(:,((i-1)*cycleCount+1):i*cycleCount)=deviceData(:,1:cycleCount);
 end;
 %*1 for week , *0.5 for all weeks, *2 for day
-E=norm(P(:,1)-P(:,2))*0.5;
+E=norm(P(:,1)-P(:,2))*2;
 minPts=30;
 [C, ptsC, dbscanCenter] = dbscan(P, E, minPts);
 satisfying = find(~ptsC);

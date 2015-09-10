@@ -26,8 +26,9 @@ function [center,coeff,cycleError]=fuzzyClustering21Centers(devices, centerCount
                 Y(i,(weekNumber-1)*dayDataLength+1:weekNumber*dayDataLength) = data;
             end;
         end;
-
+        csvwrite(strcat('weekday',num2str(weekDay),'.csv'),Y');
         [c,U,objFunction]=fcm(Y,centerCount,[exponent; iterationCount; nan; nan]);
+        %[~,c]=kmeans(Y,centerCount);
         center(:,:,weekDay)=c;
 %         [U,center,~]=myFcm(Y,iterationCount,centerCount,exponent); 
 %         figure;

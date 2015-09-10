@@ -41,7 +41,7 @@ function [center,coeff,meanCycleError,cycleError,deviceParams]=fuzzyClustering(d
             i=i+1;
         end;
     end;
-    
+    %only for mean clustering
     coeff=NaN*ones(m,centerCount);
     for i=1:m
         coeff(i,:)=(center'\Y(i,:)')';

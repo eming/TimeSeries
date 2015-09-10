@@ -1,70 +1,36 @@
-m=884;
-threshold=10;
-forecastingError=nan*ones(1,m);
-reconstructionError=nan*ones(1,m);
-forecastingErrorToPlot=[];
-reconstructionErrorToPlot=[];
-countOfBadToShow=5;
-fLength=672;
-tLength=672;
-for i=1:m
-    forecastingError(i) = 100*mean(abs(coeff(i,:,1)*forecastedCenters - data(i,8065:(8064+fLength))))/(max(data(i,:))-min(data(i,:)));
-    reconstructionError(i) = 100*mean(abs(coeff(i,:,1)*center(:,1:tLength,1) - data(i,1:tLength)))/(max(data(i,:))-min(data(i,:)));
-    if forecastingError(i)>15 && countOfBadToShow>0
-        forecastingErrorToPlot = [forecastingErrorToPlot forecastingError(i)];
-        reconstructionErrorToPlot=[reconstructionErrorToPlot reconstructionError(i)];
-%         countOfBadToShow=countOfBadToShow-1;
-%         figure('name','forecasting error','NumberTitle','off');
-%         hold on;
-%         plot(data(i,8065:8156));
-%         plot(abs(coeff(i,:,1)*forecastedCenters));
-%         hold off;
+
+hold on;
+%plot(center(1,:,1));
+plot(center(2,:,1));
+plot(center(3,:,1));
+hold off;
+return;
+
+figure('name','centers','NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
+hold on;
+plot(smooth(data(3,:),21));
+plot(smooth(data(2,:),21));
+hold of;
+return;
+
+figure('name','centers','NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
+for i=1:1003
+    if ismember(i,outliers)
+        color='r';
+    else
+        color='b';
     end;
+    d=smooth(data(i,:),21);
+    plot(1:8736, d, color);
+    pause(0.5);
 end;
-% figure('name','forecasting error','NumberTitle','off');
-% hold on;
-% plot(sort(forecastingError(satisfying)));
-% plot(1:length,ones(1,length)*5);
-% plot(1:length,ones(1,length)*10);
-% plot(1:length,ones(1,length)*15);
-% plot(1:length,ones(1,length)*20);
-% hold off;
+return;
 
-[~,length]=size(forecastingErrorToPlot);
-figure('name','forecasting error','NumberTitle','off');
-hold on;
-[forecastingErrorToPlot,indexing]=sort(forecastingErrorToPlot);
-plot(forecastingErrorToPlot);
-reconstructionErrorToPlot=reconstructionErrorToPlot(indexing);
-plot(reconstructionErrorToPlot);
-plot(1:length,ones(1,length)*10);
-hold off;
-corrData=[forecastingErrorToPlot' reconstructionErrorToPlot'];
-corrplot(corrData)
-
-forecastingErrorToPlot=forecastingError;
-reconstructionErrorToPlot=reconstructionError;
-[~,length]=size(forecastingErrorToPlot);
-figure('name','forecasting error','NumberTitle','off');
-hold on;
-[forecastingErrorToPlot,indexing]=sort(forecastingErrorToPlot);
-plot(forecastingErrorToPlot);
-reconstructionErrorToPlot=reconstructionErrorToPlot(indexing);
-plot(reconstructionErrorToPlot);
-plot(1:length,ones(1,length)*10);
-hold off;
-corrData=[forecastingErrorToPlot' reconstructionErrorToPlot'];
-corrplot(corrData)
-
-% figure('name','forecasting error','NumberTitle','off');
-% mean(forecastingError)
-% hold on;
-% plot(sort(forecastingError));
-% plot(1:m,ones(1,m)*5);
-% plot(1:m,ones(1,m)*10);
-% plot(1:m,ones(1,m)*15);
-% plot(1:m,ones(1,m)*20);
-% hold off;
+error=[];
+for i=1:1003
+    error=[error mean(abs(data(i,2:8736)-data(i,1:8735)))/(max(data(i,:))-min(data(i,:)))];
+end;
+mean(error)
 return;
 
 j=1;
