@@ -1,8 +1,32 @@
+data=data(finalOutliers,:);
+for i=1:50
+    figure('name',strcat(num2str(i),'th data'),'NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
+    plot(smooth(data(i,:),21));
+end;
+return;
 
+%c=forecastedCenters;
+c=center;
+for i=[1:7]
+    figure('name',strcat(num2str(i),' week day'),'NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
+    hold on;
+    %1,2,3,6,7- 1,2
+    %4,5 - 1,2,3
+    plot(c(1,:,i));
+    %if i==1
+        plot(c(2,:,i));
+    %else
+        plot(c(3,:,i));
+    %end;
+    hold off;
+end;
+return;
+
+figure('name',strcat(num2str(i),' week day'),'NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);
 hold on;
-%plot(center(1,:,1));
-plot(center(2,:,1));
-plot(center(3,:,1));
+for i=[1:5]
+    plot(externalData((2184-167):2184,i));
+end;
 hold off;
 return;
 

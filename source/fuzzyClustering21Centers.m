@@ -1,6 +1,6 @@
 %for each week day we are doing clustering with 3 cluster centers
 %for each clustering we use concatanated corresponding week day data
-%throughout 12 weeks(saving 13 week for validation forecasting quality)of
+%throughout 12 weeks(saving 13 week for validation of forecasting quality)of
 %each device(for each device we have 4*24*12 length row data for
 %clustering) as items to cluster. As result we return all centers, all
 %reconstruction parameters for each item for clustering, all reconstruction
@@ -26,7 +26,7 @@ function [center,coeff,cycleError]=fuzzyClustering21Centers(devices, centerCount
                 Y(i,(weekNumber-1)*dayDataLength+1:weekNumber*dayDataLength) = data;
             end;
         end;
-        csvwrite(strcat('weekday',num2str(weekDay),'.csv'),Y');
+        %csvwrite(strcat('weekday',num2str(weekDay),'.csv'),Y');
         [c,U,objFunction]=fcm(Y,centerCount,[exponent; iterationCount; nan; nan]);
         %[~,c]=kmeans(Y,centerCount);
         center(:,:,weekDay)=c;
@@ -38,7 +38,7 @@ function [center,coeff,cycleError]=fuzzyClustering21Centers(devices, centerCount
         for i=1:m
             coeff(i,:,weekDay)=(c'\Y(i,:)')';
         end;
-        badExamplesToPlotCountForEachWeekDay=1;
+        badExamplesToPlotCountForEachWeekDay=0;
         for i=1:m
 %           If “RowData” is data serie for a spesific week day 
 %           then device reconstruction error for one data point in rowData is 

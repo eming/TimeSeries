@@ -1,6 +1,6 @@
 %interpolation
 clear all;
-data = csvread('weekday1weather.csv',0,1);
+data = csvread('weekday7weather.csv',0,1);
 newData=ones(312*4,5);
 data=data(:,1:5);
 oldIndex=1:312;

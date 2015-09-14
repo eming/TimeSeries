@@ -1,5 +1,5 @@
 close all;
-clear all;
+%clear all;
 warning('off','MATLAB:rankDeficientMatrix');
 %load devices data
 load('devicesRowDataAndExternalRowData.mat');
@@ -7,7 +7,7 @@ load('devicesRowDataAndExternalRowData.mat');
 deviceKeys = keys(devices);
 [~,m]=size(deviceKeys);
 %length of the data will be used(maybe some of them will be skiped for testing phase)
-rowDataLength=4*24*7*13;
+rowDataLength=4*24*7*12;
 %all data length
 allDataLength=4*24*7*13;
 stepForResolution = 1;
@@ -55,7 +55,7 @@ iterationCount=50;
 exponent=2;
 weekCount=rowDataLength/(4*24*7);
 %threshold used inside fuzzyClustering21Centers, we are plotting some
-%data whos reconstruction error is greater than threshold just to get
+%data whose reconstruction error is greater than threshold just to get
 %filling about bad reconstruction cases
 threshold=10;
 [center,coeff,cycleError] = fuzzyClustering21Centers(devices, centerCount,exponent,iterationCount, rowDataLength, weekCount, threshold);
